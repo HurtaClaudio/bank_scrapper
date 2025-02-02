@@ -1,0 +1,9 @@
+//hidden files
+.vscode
+.DS_Store
+
+//folders
+env_scrapper_bancos
+
+//files
+credentials.yaml
