@@ -34,7 +34,6 @@ class Clicker:
 
         try:
             button_location = pyautogui.locateOnScreen(image_path, confidence=0.9)
-            print(button_location)
         except:
             raise ValueError(f"Image {image_path} not found on screen.")
 
@@ -42,14 +41,14 @@ class Clicker:
         img_x, img_y = int(button_center[0]*0.5), int(button_center[1]*0.5)
         return img_x, img_y
     
-    def check_image_on_screen(self, check_img):
-        for i in range(4):
+    def check_image_on_screen(self, check_img, num_retries=4):
+        for i in range(num_retries):
             try:
                 self.find(check_img)
-                break
+                return True
             except:
-                if i == 3:
-                    raise ValueError(f'img "{check_img}" not found. Unstable UI.')
+                if i == num_retries-1:
+                    return False
                 pyautogui.hotkey('command', 'r')
                 time.sleep(self.loading_sleep_time)
 
@@ -85,28 +84,18 @@ class Clicker:
         if not isinstance(x, (int, float, np.int64)) or not isinstance(y, (int, float, np.int64)):
             raise ValueError("Coordinates must be numeric.")
 
-if __name__ == "__main__":
-    clicker = Clicker()
-    clicker.open_browser()
-    clicker.open_website('bice.cl')
+    def open_browser(self):
+        applescript = """
+        do shell script "open -n -a 'Google Chrome'"
+        """
+        subprocess.run(["osascript", "-e", applescript])
+        time.sleep(3)
+        self.find_move_click('find_img/google_profile.png')
+        time.sleep(3)
 
-    clicker.find_move_click('find_img/ingresar.png')
-    clicker.find_move_click('find_img/personas.png')
-    time.sleep(clicker.loading_sleep_time)
+    def open_website(self, website):
+        pyautogui.hotkey('command', 'l')
+        pyautogui.write(website)
+        pyautogui.hotkey('enter')
+        time.sleep(3)
 
-    clicker.find_move_click_write(image_path='find_img/rut.png', info_key='rut')
-    clicker.find_move_click_write(image_path='find_img/clave.png', info_key='bice_pass')
-    clicker.find_move_click('find_img/ingresar_2.png')
-    time.sleep(clicker.loading_sleep_time)
-
-    clicker.find_move_click('find_img/cuentas.png')
-    clicker.find_move_click('find_img/cuenta_corriente.png')
-    clicker.find_move_click('find_img/saldos_movimientos.png')
-    time.sleep(clicker.loading_sleep_time)
-
-    clicker.check_image_on_screen('find_img/check_saldos_movimientos.png')
-    clicker.scroll_down(10)
-    clicker.find_move_click('find_img/descargar.png')
-    time.sleep(clicker.loading_sleep_time)
-
-    clicker.focus_program(program_name='vscode')

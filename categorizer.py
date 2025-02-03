@@ -18,7 +18,7 @@ def categorize_purchases(df):
 
         # Get user input
         print(f"\n{(index+1)}/{n}")
-        print(f"Purchase: {row['Detalle']} - Amount: {row['Monto']}")
+        print(f"Purchase: {row['Detalle']} - Amount: {row['Monto']} - Date: {row['Fecha']}")
         selected_category_int = int(input("Enter category number: "))
 
         # Assign the selected category to the row
