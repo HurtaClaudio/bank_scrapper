@@ -43,42 +43,32 @@ class Clicker:
         return img_x, img_y
     
     def check_image_on_screen(self, check_img):
-        try:
-            for i in range(4):
-                try:
-                    self.find(check_img)
-                    break
-                except:
-                    if i == 3:
-                        raise ValueError(f'img "{check_img}" not found.')
-                    pyautogui.hotkey('command', 'r')
-                    time.sleep(self.loading_sleep_time)
-        except:
-            ValueError(f"Program failed to find {check_img}, unstable UI.")
-
+        for i in range(4):
+            try:
+                self.find(check_img)
+                break
+            except:
+                if i == 3:
+                    raise ValueError(f'img "{check_img}" not found. Unstable UI.')
+                pyautogui.hotkey('command', 'r')
+                time.sleep(self.loading_sleep_time)
 
     def click(self, x, y):
-        if not isinstance(x, (int, float, np.int64)) or not isinstance(y, (int, float, np.int64)):
-            raise ValueError("Coordinates must be numeric.")
-
+        self._validate_coordinates(x, y)
         pyautogui.click(x=x, y=y)
 
     def move(self, x, y):
-        if not isinstance(x, (int, float, np.int64)) or not isinstance(y, (int, float, np.int64)):
-            raise ValueError("Coordinates must be numeric.")
-
+        self._validate_coordinates(x, y)
         pyautogui.moveTo(x, y, self.move_duration, pyautogui.easeOutQuad)
 
     def scroll_down(self, amount):
         if not isinstance(amount, int):
             raise ValueError("Scroll amount must be an integer.")
-            
         pyautogui.scroll(-amount)
 
     def find_move(self, image_path):
         img_x, img_y = self.find(image_path)
         self.move(img_x, img_y)
-
         return img_x, img_y
 
     def find_move_click(self, image_path):
@@ -88,10 +78,12 @@ class Clicker:
     def find_move_click_write(self, image_path, info_key):
         if info_key not in self.available_data:
             raise ValueError(f"{info_key} is not loaded in data.")
-        
         self.find_move_click(image_path)
         pyautogui.write(self.data[info_key])
 
+    def _validate_coordinates(self, x, y):
+        if not isinstance(x, (int, float, np.int64)) or not isinstance(y, (int, float, np.int64)):
+            raise ValueError("Coordinates must be numeric.")
 
 if __name__ == "__main__":
     clicker = Clicker()
