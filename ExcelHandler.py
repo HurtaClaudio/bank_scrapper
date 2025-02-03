@@ -31,7 +31,9 @@ class ExcelHandler:
         df = df.drop(df.index[-1])
         df.rename(columns={'Monto $': 'Monto'}, inplace=True)
         df['Monto'] = df['Monto'].fillna(0).map(int)
-        df['Detalle'] = df['Detalle'].str.replace('Cargo por ', '').replace('Abono por ', '').replace(',', '')
+        df['Detalle'] = (df['Detalle'].str.replace('Cargo por ', '')
+                                      .str.replace('Abono por ', '')
+                                      .str.replace(",", ""))
 
         for index, row in df.iterrows():
             detalle_value = row['Detalle']

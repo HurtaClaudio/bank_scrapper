@@ -12,8 +12,9 @@ class DBHandler:
             "Categoria": "TEXT",
             "Detalle": "TEXT",
             "Monto": "INTEGER",
-            "Agrupacion": "TEXT",
-            "PRIMARY KEY (Fecha, Cargo_Abono, Detalle, Monto)": ""
+            "Categoria_0": "TEXT",
+            "Categoria_1": "TEXT",
+            "PRIMARY KEY (Fecha, Categoria, Detalle, Monto)": ""
         }
 
     def create_table(self):
@@ -23,9 +24,9 @@ class DBHandler:
         self.conn.commit()
 
     def insert_data(self, data):
-        placeholders = ", ".join(["?" for _ in data]) + ", ?"
+        placeholders = ", ".join(["?" for _ in data]) + ", ?, ?"
         insert_query = f"INSERT INTO {self.table_name} VALUES ({placeholders})"
-        self.cursor.execute(insert_query, tuple(data) + (None,))
+        self.cursor.execute(insert_query, tuple(data) + (None, None,))
         self.conn.commit()
 
     def fetch_data(self):
@@ -48,7 +49,6 @@ class DBHandler:
         self.cursor.execute(f"DROP TABLE IF EXISTS {self.table_name}")
         self.conn.commit()
 
-
     def save_to_db(self, df):
         # Insert data into the table, avoiding duplicates
         for _, row in df.iterrows():
@@ -56,16 +56,29 @@ class DBHandler:
             check_query = f"SELECT 1 FROM {self.table_name} WHERE Fecha=? AND Categoria=? AND Detalle=? AND Monto=?"
             self.cursor.execute(check_query, (row['Fecha'], row['Categoria'], row['Detalle'], row['Monto']))
             if not self.cursor.fetchone():
-                self.insert_data(self.table_name, (row['Fecha'], row['Categoria'], row['Detalle'], row['Monto']))
+                self.insert_data((row['Fecha'], row['Categoria'], row['Detalle'], row['Monto']))
                 print(f"Inserted row: {row['Fecha']}, {row['Categoria']}, {row['Detalle']}, {row['Monto']}")
 
     def query_db(self):
         # Fetch all results
-        rows = self.fetch_data(self.table_name)
+        rows = self.fetch_data()
 
         # Print the results
         for row in rows:
             print(row)
+
+    def update_data(self, df):
+        update_query = f"""
+        UPDATE {self.table_name}
+        SET Categoria_0 = ?, Categoria_1 = ?
+        WHERE Fecha = ? AND Categoria = ? AND Detalle = ? AND Monto = ?
+        """
+        for _, row in df.iterrows():
+            self.cursor.execute(update_query, (
+                row['Categoria_0'], row['Categoria_1'],
+                row['Fecha'], row['Categoria'], row['Detalle'], row['Monto']
+            ))
+        self.conn.commit()
 
 # Example usage
 if __name__ == "__main__":
